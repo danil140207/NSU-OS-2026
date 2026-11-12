@@ -8,20 +8,30 @@ extern char *tzname[];
 int main(void)
 {
     time_t now;
+    time_t ret;
     struct tm *sp;
 
     setenv("TZ", "PST8PDT", 1);
     tzset();
 
-    (void) time(&now);
+    ret = time(&now);
+    if (ret == (time_t)-1) {
+        perror("time");
+        return 1;
+    }
 
-    printf("%s", ctime(&now));
+    printf("Current local time: %s", ctime(&now));
 
     sp = localtime(&now);
-    printf("%d/%d/%d %d:%02d %s\n",
+    if (sp == NULL) {
+        perror("localtime");
+        return 1;
+    }
+
+    printf("In California (PDT): %d/%d/%d %d:%02d %s\n",
         sp->tm_mon + 1, sp->tm_mday,
         sp->tm_year + 1900, sp->tm_hour,
         sp->tm_min, tzname[sp->tm_isdst]);
 
-    exit(0);
+    return 0;
 }
